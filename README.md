@@ -25,8 +25,26 @@ nvm use
 yarn
 ```
 
-Init the search:
+Basic search:
 
 ```bash
 yarn start --targetFunc "transfer(address,uint256)"
+```
+
+Custom args and prefix:
+
+```bash
+yarn start --targetFunc "transfer(address,uint256)" --args "uint,bool" --prefix "myFunc_"
+```
+
+Short version:
+
+```bash
+yarn start -t "transfer(address,uint256)" -a "uint,bool" -p "myFunc_"
+```
+
+Only first N bytes (for a quick search):
+
+```bash
+yarn start -t "transfer(address,uint256)" --firstNBytes 1
 ```

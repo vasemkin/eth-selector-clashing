@@ -1,7 +1,8 @@
 import { randomBytes } from 'crypto';
 import { Nullable } from '../types/helpers';
 import { getSelector, getSelectorArgs } from '../utils/selector';
-import { DEFAULT_PREFIX } from '../constants/config';
+import { DEFAULT_BYTES, DEFAULT_PREFIX } from '../constants/config';
+import { SearcherArgs, SearcherResult } from '../types/searcher';
 
 export class Searcher {
     targetFunc: string;
@@ -9,16 +10,23 @@ export class Searcher {
     definition: Nullable<string>;
     selector: Nullable<string>;
     prefix: Nullable<string>;
+    nBytes: Nullable<number>;
     args: string;
 
-    constructor(targetFunc: string, customPrefix?: string) {
+    constructor({
+        targetFunc,
+        onlyFirstNBytes,
+        args,
+        customPrefix
+    }: SearcherArgs) {
         this.targetFunc = targetFunc;
-        this.args = getSelectorArgs(targetFunc);
-        this.targetSelector = getSelector(targetFunc);
+        this.nBytes = onlyFirstNBytes ?? DEFAULT_BYTES;
+        this.targetSelector = getSelector(targetFunc, this.nBytes);
+        this.args = args ?? getSelectorArgs(targetFunc);
         this.prefix = customPrefix ?? DEFAULT_PREFIX;
     }
 
-    search() {
+    search(): SearcherResult {
         if (!this.targetSelector) {
             throw new Error('Error while calcuating targetFunc selector');
         }
@@ -27,23 +35,16 @@ export class Searcher {
             throw new Error('Error while parsing args');
         }
 
-        console.log('Searching for the new selector...');
-        console.log({
-            targetSelector: this.targetSelector,
-            targetFunc: this.targetFunc
-        });
-
         while (this.selector !== this.targetSelector) {
             const randBytes = randomBytes(4).toString('hex');
             this.definition = `${this.prefix}${randBytes}(${this.args})`;
-            this.selector = getSelector(this.definition);
+            this.selector = getSelector(this.definition, this.nBytes || 4);
         }
 
-        console.log('Target selector found!');
-        console.log({
+        return {
             selector: this.selector,
             targetSelector: this.targetSelector,
-            definition: this.definition
-        });
+            definition: this.definition!
+        };
     }
 }

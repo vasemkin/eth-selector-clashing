@@ -1,0 +1,3 @@
+{
+    "rust-analyzer.linkedProjects": ["./rust/eth_function_selector/Cargo.toml"]
+}
